@@ -66,14 +66,29 @@ namespace Application.Service
 
             return "Product created successfully";
         }
+        public async Task<string> UpdateProductAsync(int id, CreateProductDto updateProductDto, string pictureUrl)
+        {
+            var product = new Product
+            {
+                Name = updateProductDto.Name,
+                Category = updateProductDto.Category,
+                Consumers = updateProductDto.Consumers,
+                Description = updateProductDto.Description,
+                Price = updateProductDto.Price,
+                Stock = updateProductDto.Stock,
+                ImageUrl = pictureUrl
+            };
 
-        public Task<bool> DeleteProductAsync(int id)
-        {
-            throw new NotImplementedException();
+            var updatedProduct = await _productRepository.UpdateProductAsync(id, product);
+            if (updatedProduct == null) return "Failed to update product";
+
+            return "Product updated successfully";
         }
-        public Task<ProductDto> UpdateProductAsync(int id, CreateProductDto updateProductDto)
+        public async Task<bool> DeleteProductAsync(int id)
         {
-            throw new NotImplementedException();
+            var result = await _productRepository.DeleteProductAsync(id);
+
+            return result;
         }
     }
 }

@@ -32,15 +32,32 @@ namespace Infrastructure.Repositories
 
             return product;
         }
-
-        public Task<bool> DeleteProductAsync(int id)
+        public async Task<Product> UpdateProductAsync(int id, Product product)
         {
-            throw new NotImplementedException();
+            var updateProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if(updateProduct == null) return product;
+
+            if(product.Name != null) updateProduct.Name = product.Name;
+            if(product.Category != null) updateProduct.Category = product.Category;
+            if(product.Consumers != null) updateProduct.Consumers = product.Consumers;
+            if(product.Description != null) updateProduct.Description = product.Description;
+            if(product.Price != null) updateProduct.Price = product.Price;
+            if(product.Stock != null) updateProduct.Stock = product.Stock;
+            if(product.ImageUrl != null) updateProduct.ImageUrl = product.ImageUrl;
+
+            await _context.SaveChangesAsync();
+
+            return updateProduct;
         }
-
-        public Task<Product> UpdateProductAsync(Product product)
+        public async Task<bool> DeleteProductAsync(int id)
         {
-            throw new NotImplementedException();
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if(product == null) return false;
+
+            await _context.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

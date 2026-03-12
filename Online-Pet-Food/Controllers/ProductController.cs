@@ -57,5 +57,40 @@ namespace Online_Pet_Food.Controllers
 
             return Ok(product);
         }
+        [HttpPut("Update-Product/{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromForm] CreateProductDto updateProductDto)
+        {
+            string? pictureUrl = null;
+
+            if (updateProductDto.Image != null && updateProductDto.Image.Length > 0)
+            {
+                var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+                var imagesDir = Path.Combine(webRoot, "images");
+                Directory.CreateDirectory(imagesDir);
+
+                var ext = Path.GetExtension(updateProductDto.Image.FileName);
+                var fileName = $"{Guid.NewGuid():N}{ext}";
+                var filePath = Path.Combine(imagesDir, fileName);
+
+                await using (var stream = System.IO.File.Create(filePath))
+                {
+                    await updateProductDto.Image.CopyToAsync(stream);
+                }
+
+                pictureUrl = "/images/product" + fileName;
+            }
+            var product = await _productService.UpdateProductAsync(id, updateProductDto, pictureUrl);
+
+            return Ok(product);
+        }
+        [HttpDelete("Delete-Product/{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var result = await _productService.DeleteProductAsync(id);
+
+            if (!result) return NotFound(new { Message = "Product not found" });
+
+            return Ok(new { Message = "Product deleted successfully" });
+        }
     }
 }
