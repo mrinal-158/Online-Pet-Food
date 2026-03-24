@@ -45,7 +45,7 @@ namespace Online_Pet_Food.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login([FromForm] string email, [FromForm] string password)
         {
             var jwtToken = await _authService.LoginAsync(email, password);
             if(jwtToken == null) return Unauthorized(new { Message = "Invalid email or password" });

@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Online_Pet_Food.Controllers
@@ -31,6 +32,8 @@ namespace Online_Pet_Food.Controllers
 
             return Ok(product);
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost("Add-Product")]
         public async Task<IActionResult> CreateProduct([FromForm] CreateProductDto createProductDto)
         {
@@ -57,6 +60,8 @@ namespace Online_Pet_Food.Controllers
 
             return Ok(product);
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpPut("Update-Product/{id}")]
         public async Task<IActionResult> UpdateProduct(int id, [FromForm] CreateProductDto updateProductDto)
         {
@@ -83,6 +88,8 @@ namespace Online_Pet_Food.Controllers
 
             return Ok(product);
         }
+
+        [Authorize(Roles = "Admin")]
         [HttpDelete("Delete-Product/{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

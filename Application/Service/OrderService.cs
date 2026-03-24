@@ -21,61 +21,79 @@ namespace Application.Service
         }
         public async Task<bool> CreateOrderAsync(int userId, CreateOrderDto createOrderDto)
         {
-            //var user = await _userRepository.LoginUser(userId);
-            //var order = new Order
-            //{
-            //    UserId = userId,
-            //    Name = createOrderDto.Name,
-            //    Phone = createOrderDto.Phone,
-            //    Address = createOrderDto.Address,
-            //    TotalPrice = createOrderDto.TotalPrice,
-            //    OrderDate = createOrderDto.OrderDate,
-            //    ExpectedDate = createOrderDto.ExpectedDate,
-            //    OrderItems = createOrderDto.OrderItems.Select(oi => new OrderItem
-            //    {
-            //        OrderId = Order.Id,
-            //        ProductId = oi.ProductId,
-            //        Amount = oi.Amount,
-            //        Price = oi.Price
-            //    }).ToList()
-            //};
-
-            // Validate products and calculate prices
+            // Create OrderItems from DTO and calculate total price
             var orderItems = new List<OrderItem>();
             decimal totalPrice = 0;
 
             foreach (var item in createOrderDto.OrderItems)
             {
-                // ✅ Get product from database (don't trust client price!)
                 var product = await _productRepository.GetProductByIdAsync(item.ProductId);
-
-                // ✅ Create OrderItem WITHOUT setting OrderId
                 var orderItem = new OrderItem
                 {
                     ProductId = item.ProductId,
                     Amount = item.Amount,
-                    Price = product.Price * item.Amount  // ✅ Get price from database, not client
+                    Price = product.Price * item.Amount
                 };
-
                 orderItems.Add(orderItem);
                 totalPrice += product.Price * item.Amount;
             }
 
-            // ✅ Create Order with OrderItems
             var order = new Order
             {
                 UserId = userId,
                 Name = createOrderDto.Name,
                 Phone = createOrderDto.Phone,
+                Email = createOrderDto.Email,
                 Address = createOrderDto.Address,
-                OrderItems = orderItems,  // ✅ EF Core will automatically set OrderId
-                TotalPrice = totalPrice,  // ✅ Server calculates, not client
-                OrderDate = DateTime.UtcNow,  // ✅ Server sets, not client
-                ExpectedDate = DateTime.UtcNow.AddDays(3)  // ✅ Server sets, not client
+                Description = createOrderDto.Description,
+                OrderItems = orderItems,
+                TotalPrice = totalPrice,
+                OrderDate = DateTime.UtcNow,
+                ExpectedDate = DateTime.UtcNow.AddDays(3)
             };
 
             var orderResult = await _orderRepository.CreateOrderAsync(order);
             return true;
+        }
+        public async Task<List<OrderResponse>> GetOrdersByUserIdAsync(int userId)
+        {
+            var orders = await _orderRepository.GetOrdersByUserIdAsync(userId);
+
+            var orderResponse = new List<OrderResponse>();
+            foreach (var item in orders)
+            {
+                var orderItems = new List<OrderItemResponse>();
+                foreach (var orderItem in item.OrderItems)
+                {
+                    orderItems.Add(new OrderItemResponse
+                    (
+                        ProductId: orderItem.ProductId,
+                        Amount: orderItem.Amount
+                    ));
+                }
+                orderResponse.Add(new OrderResponse
+                (
+                    OrderId: item.Id,
+                    Name: item.Name,
+                    Phone: item.Phone,
+                    Email: item.Email,
+                    Address: item.Address,
+                    Description: item.Description,
+                    OrderItems: orderItems,
+                    OrderDate: item.OrderDate,
+                    TotalPrice: item.TotalPrice,
+                    PaymentStatus: item.PaymentStatus.ToString()
+                ));
+            }
+
+            return orderResponse;
+        }
+
+        public async Task<string> CancelOrderAsync(int userId, int orderId)
+        {
+            var result = await _orderRepository.CancelOrderAsync(userId, orderId);
+
+            return result;
         }
     }
 }

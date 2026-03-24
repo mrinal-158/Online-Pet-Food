@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Application.DTOs
 {
-    public record ProductDto
+    public record ProductResponse
     (
         int Id,
         string Name,

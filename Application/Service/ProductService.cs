@@ -12,11 +12,11 @@ namespace Application.Service
         {
             _productRepository = productRepository;
         }
-        public async Task<IEnumerable<ProductDto>> GetProductsAsync()
+        public async Task<IEnumerable<ProductResponse>> GetProductsAsync()
         {
             var products = await _productRepository.GetProductsAsync();
 
-            var productDtos = products.Select(p => new ProductDto
+            var productDtos = products.Select(p => new ProductResponse
             (
                 Id: p.Id,
                 Name: p.Name,
@@ -30,11 +30,11 @@ namespace Application.Service
 
             return productDtos;
         }
-        public async Task<ProductDto> GetProductByIdAsync(int id)
+        public async Task<ProductResponse> GetProductByIdAsync(int id)
         {
             var product = await _productRepository.GetProductByIdAsync(id);
 
-            var productDto = new ProductDto
+            var productDto = new ProductResponse
             (
                 Id: product.Id,
                 Name: product.Name,
