@@ -38,12 +38,34 @@ namespace Infrastructure.Repositories
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
             if (order == null) return "Unauthorize";
 
-            if(order.PaymentStatus == PaymentStatus.Completed) return "Paid"; 
+            if (order.PaymentStatus == PaymentStatus.Completed) return "Paid";
 
             _context.Orders.Remove(order);
             await _context.SaveChangesAsync();
 
             return "Order cancelled successfully!";
+        }
+        public async Task<Order> GetOrderByIdAsync(int orderId)
+        {
+            var order = await _context.Orders
+                .Where(o => o.Id == orderId)
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync();
+            return order;
+        }
+        public async Task<string> CheckValidOrder(int userId, int orderId)
+        {
+            var order = await _context.Orders.FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+            if (order == null) return "Unauthorize";
+            if (order.PaymentStatus == PaymentStatus.Completed) return "Paid";
+            return "Valid";
+        }
+        public async Task<string> UpdatePaymentStatus(Order order)
+        {
+            order.PaymentStatus = PaymentStatus.Completed;
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync();
+            return "Payment successful!";
         }
     }
 }

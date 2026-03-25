@@ -88,12 +88,23 @@ namespace Application.Service
 
             return orderResponse;
         }
-
         public async Task<string> CancelOrderAsync(int userId, int orderId)
         {
             var result = await _orderRepository.CancelOrderAsync(userId, orderId);
 
             return result;
         }
+        public async Task<string> PayOrderAsync(int userId, int orderId)
+        {
+            var result = await _orderRepository.CheckValidOrder(userId, orderId);
+            if(result != "Valid") return result;
+
+            var order = await _orderRepository.GetOrderByIdAsync(orderId);
+
+            
+            var payment = await _orderRepository.UpdatePaymentStatus(order);
+            return "Success";
+        }
+        
     }
 }

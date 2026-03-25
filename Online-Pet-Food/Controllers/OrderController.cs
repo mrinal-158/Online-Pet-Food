@@ -51,5 +51,18 @@ namespace Online_Pet_Food.Controllers
             if (result == "Paid") return BadRequest(new { Message = "Unable to cancel order because it has been paid" });
             return Ok(new { Message = "Order cancelled successfully" });
         }
+
+        [Authorize(Roles = "Customer")]
+        [HttpPost("Pay-Order/{orderId}")]
+        public async Task<IActionResult> PayOrder(int orderId)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id");
+            var userId = int.Parse(userIdClaim.Value);
+
+            var result = await _orderService.PayOrderAsync(userId, orderId);
+            if(result != "Success") return BadRequest(new { Message = result });
+
+            return Ok(new { Message = "Order Confirm!" });
+        }
     }
 }

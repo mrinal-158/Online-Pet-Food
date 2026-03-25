@@ -9,6 +9,9 @@ namespace Domain.Interfaces
     {
         Task<bool> CreateOrderAsync(Order order);
         Task<List<Order>> GetOrdersByUserIdAsync(int userId);
+        Task<Order> GetOrderByIdAsync(int orderId);
         Task<string> CancelOrderAsync(int userId, int orderId);
+        Task<string> CheckValidOrder(int userId, int orderId);
+        Task<string> UpdatePaymentStatus(Order order);
     }
 }
