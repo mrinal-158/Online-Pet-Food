@@ -25,7 +25,7 @@ namespace Application.Service
             var orderItems = new List<OrderItem>();
             decimal totalPrice = 0;
 
-            foreach (var item in createOrderDto.OrderItems)
+            foreach (var item in createOrderDto.OrderItemsDto)
             {
                 var product = await _productRepository.GetProductByIdAsync(item.ProductId);
                 var orderItem = new OrderItem

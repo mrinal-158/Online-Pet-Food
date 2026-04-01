@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+using Application.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Swagger / API and controllers explorer
@@ -49,6 +53,13 @@ builder.Services.AddAuthentication(options =>
         )
     };
 });
+
+builder.Services
+    .AddFluentValidationAutoValidation()
+    .AddFluentValidationClientsideAdapters()
+    .AddValidatorsFromAssemblyContaining<CreateOrderDtoValidator>()
+    .AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>()
+    .AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 
 var app = builder.Build();
 
