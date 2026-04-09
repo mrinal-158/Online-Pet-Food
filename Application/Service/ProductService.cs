@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
+using AutoMapper;
 using Domain.Entities;
 using Domain.Interfaces;
 
@@ -8,9 +9,11 @@ namespace Application.Service
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
-        public ProductService(IProductRepository productRepository)
+        private readonly IMapper _mapper;
+        public ProductService(IProductRepository productRepository, IMapper mapper)
         {
             _productRepository = productRepository;
+            _mapper = mapper;
         }
         public async Task<IEnumerable<ProductResponse>> GetProductsAsync()
         {
@@ -48,23 +51,29 @@ namespace Application.Service
 
             return productDto;
         }
-        public async Task<string> CreateProductAsync(CreateProductDto createProductDto, string pictureUrl)
+        public async Task<CreateProductDto> CreateProductAsync(CreateProductDto createProductDto, string pictureUrl)
         {
-            var product = new Product
-            {
-                Name = createProductDto.Name,
-                Category = createProductDto.Category,
-                Consumers = createProductDto.Consumers,
-                Description = createProductDto.Description,
-                Price = createProductDto.Price,
-                Stock = createProductDto.Stock,
-                ImageUrl = pictureUrl
-            };
+            //var product = new Product
+            //{
+            //    Name = createProductDto.Name,
+            //    Category = createProductDto.Category,
+            //    Consumers = createProductDto.Consumers,
+            //    Description = createProductDto.Description,
+            //    Price = createProductDto.Price,
+            //    Stock = createProductDto.Stock,
+            //    ImageUrl = pictureUrl
+            //};
+
+            var product = _mapper.Map<Product>(createProductDto);
+            product.ImageUrl = pictureUrl;
 
             var createdProduct = await _productRepository.CreateProductAsync(product);
-            if(createdProduct == null) return "Failed to create product";
 
-            return "Product created successfully";
+            if (createdProduct == null) return null;
+
+            var createdProductDto = _mapper.Map<CreateProductDto>(createdProduct);
+
+            return createdProductDto;
         }
         public async Task<string> UpdateProductAsync(int id, CreateProductDto updateProductDto, string pictureUrl)
         {

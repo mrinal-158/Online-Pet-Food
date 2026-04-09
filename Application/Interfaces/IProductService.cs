@@ -9,7 +9,7 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<ProductResponse>> GetProductsAsync();
         Task<ProductResponse> GetProductByIdAsync(int id);
-        Task<string> CreateProductAsync(CreateProductDto createProductDto, string pictureUrl);
+        Task<CreateProductDto> CreateProductAsync(CreateProductDto createProductDto, string pictureUrl);
         Task<string> UpdateProductAsync(int id, CreateProductDto updateProductDto, string pictureUrl);
         Task<bool> DeleteProductAsync(int id);
     }

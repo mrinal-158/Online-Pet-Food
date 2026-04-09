@@ -1,23 +1,45 @@
 using Application.Interfaces;
+using Application.Mappings;
 using Application.Service;
+using Application.Validators;
 using Domain.Interfaces;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
-using Application.Validators;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Minute)
+    .CreateLogger();
+
+// Replace default logger
+builder.Host.UseSerilog();
 
 // Swagger / API and controllers explorer
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+
+// ? Register AutoMapper
+builder.Services.AddAutoMapper(typeof(ProductMappingProfile));
+
+// ? Register Fluent Validators
+builder.Services
+    .AddFluentValidationAutoValidation()
+    .AddFluentValidationClientsideAdapters()
+    .AddValidatorsFromAssemblyContaining<CreateOrderDtoValidator>()
+    .AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>()
+    .AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 
 // Dependency Injection 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -53,13 +75,6 @@ builder.Services.AddAuthentication(options =>
         )
     };
 });
-
-builder.Services
-    .AddFluentValidationAutoValidation()
-    .AddFluentValidationClientsideAdapters()
-    .AddValidatorsFromAssemblyContaining<CreateOrderDtoValidator>()
-    .AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>()
-    .AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 
 var app = builder.Build();
 
